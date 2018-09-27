@@ -256,7 +256,7 @@
   self.availableBatchFromStorage = [self.storage
       loadLogsWithGroupId:self.configuration.groupId
                     limit:self.configuration.batchSizeLimit
-                    iKeys:nil
+               targetKeys:nil
         completionHandler:^(NSArray<MSLog> *_Nonnull logArray,
                             NSString *batchId) {
 
@@ -287,15 +287,14 @@
                }
 
                // Notify delegates.
-               [self
-                   enumerateDelegatesForSelector:@selector(channel:willSendLog:)
-                                       withBlock:^(
-                                           id<MSChannelDelegate> delegate) {
-                                         for (id<MSLog> aLog in logArray) {
-                                           [delegate channel:self
-                                                 willSendLog:aLog];
-                                         }
-                                       }];
+               [self enumerateDelegatesForSelector:@selector(channel:willSendLog:)
+                                         withBlock:^(
+                                             id<MSChannelDelegate> delegate) {
+                                           for (id<MSLog> aLog in logArray) {
+                                             [delegate channel:self
+                                                   willSendLog:aLog];
+                                           }
+                                         }];
 
                // Forward logs to the ingestion.
                [self.ingestion
@@ -314,26 +313,24 @@
                                       ingestionBatchId);
 
                            // Notify delegates.
-                           [self
-                               enumerateDelegatesForSelector:@selector
-                               (channel:didSucceedSendingLog:)
-                                                   withBlock:^(
-                                                       id<MSChannelDelegate>
-                                                           delegate) {
-                                                     for (id<MSLog> aLog in
-                                                              logArray) {
-                                                       [delegate channel:self
-                                                           didSucceedSendingLog:
-                                                               aLog];
-                                                     }
-                                                   }];
+                           [self enumerateDelegatesForSelector:
+                                     @selector(channel:didSucceedSendingLog:)
+                                                     withBlock:^(
+                                                         id<MSChannelDelegate>
+                                                             delegate) {
+                                                       for (id<MSLog> aLog in
+                                                                logArray) {
+                                                         [delegate channel:self
+                                                             didSucceedSendingLog:
+                                                                 aLog];
+                                                       }
+                                                     }];
 
                            // Remove from pending logs and storage.
                            [self.pendingBatchIds removeObject:ingestionBatchId];
                            [self.storage
                                deleteLogsWithBatchId:ingestionBatchId
-                                             groupId:self.configuration
-                                                         .groupId];
+                                             groupId:self.configuration.groupId];
 
                            // Try to flush again if batch queue is not full
                            // anymore.
@@ -355,27 +352,26 @@
                                       ingestionBatchId, statusCode);
 
                            // Notify delegates.
-                           [self enumerateDelegatesForSelector:@selector
-                                 (channel:didFailSendingLog:withError:)
-                                                     withBlock:^(
-                                                         id<MSChannelDelegate>
-                                                             delegate) {
-                                                       for (id<MSLog> aLog in
-                                                                logArray) {
-                                                         [delegate channel:self
-                                                             didFailSendingLog:
-                                                                 aLog
-                                                                     withError:
-                                                                         error];
-                                                       }
-                                                     }];
+                           [self
+                               enumerateDelegatesForSelector:
+                                   @selector(channel:didFailSendingLog:withError:)
+                                                   withBlock:^(
+                                                       id<MSChannelDelegate>
+                                                           delegate) {
+                                                     for (id<MSLog> aLog in
+                                                              logArray) {
+                                                       [delegate channel:self
+                                                           didFailSendingLog:aLog
+                                                                   withError:
+                                                                       error];
+                                                     }
+                                                   }];
 
                            // Remove from pending logs.
                            [self.pendingBatchIds removeObject:ingestionBatchId];
                            [self.storage
                                deleteLogsWithBatchId:ingestionBatchId
-                                             groupId:self.configuration
-                                                         .groupId];
+                                             groupId:self.configuration.groupId];
 
                            // Update pending batch queue state.
                            if (self.pendingBatchQueueFull &&
@@ -390,8 +386,8 @@
                                       ingestionBatchId);
                      });
                    }];
-             }
-           }];
+          }
+        }];
 
   // Flush again if there is another batch to send.
   if (self.availableBatchFromStorage && !self.pendingBatchQueueFull) {

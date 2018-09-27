@@ -308,7 +308,7 @@ forTransmissionTarget:(MSAnalyticsTransmissionTarget *)transmissionTarget {
   if (transmissionTarget) {
     MSLogDebug([MSAnalytics logTag],
                @"Returning transmission target found with id %@.",
-               [MSUtility targetIdFromTargetToken:transmissionTargetToken]);
+               [MSUtility targetKeyFromTargetToken:transmissionTargetToken]);
     return transmissionTarget;
   }
   transmissionTarget = [[MSAnalyticsTransmissionTarget alloc]
@@ -316,8 +316,7 @@ forTransmissionTarget:(MSAnalyticsTransmissionTarget *)transmissionTarget {
                                                                           parentTarget:nil
                                                                           channelGroup:self.channelGroup];
   MSLogDebug([MSAnalytics logTag],
-             @"Created transmission target with id %@.",
-             [MSUtility targetIdFromTargetToken:transmissionTargetToken]);
+             @"Created transmission target with id %@.", [MSUtility targetKeyFromTargetToken:transmissionTargetToken]);
   self.transmissionTargets[transmissionTargetToken] = transmissionTarget;
 
   // TODO: Start service if not already.
